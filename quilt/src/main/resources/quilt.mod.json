@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "mixin": [
+    "anything_goes.mixins.json",
+    "anything_goes-common.mixins.json"
+  ],
+  "quilt_loader": {
+    "group": "${group}",
+    "id": "anything_goes",
+    "version": "${version}",
+    "name": "Anything Goes",
+    "description": "This is an example description! Tell everyone what your mod is about!",
+    "authors": ["Me!"],
+    "contact": {
+      "sources": "https://github.com/architectury/architectury-templates"
+    },
+    "license": "Insert License Here",
+    "icon": "assets/anything_goes/icon.png",
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "environment": "*",
+    "entrypoints": {
+      "init": [
+        "com.brittank88.anything_goes.quilt.AnythingGoesQuilt"
+      ]
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "version": "*"
+      },
+      {
+        "id": "quilt_base",
+        "version": "*"
+      },
+      {
+        "id": "minecraft",
+        "version": ">=1.19.2"
+      },
+      {
+        "id": "architectury",
+        "version": ">=6.2.43"
+      }
+    ]
+  }
+}

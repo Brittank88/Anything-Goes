@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "anything_goes",
+  "version": "${version}",
+  "name": "Example Mod",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "Insert License Here",
+  "icon": "assets/anything_goes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.brittank88.anything_goes.fabric.AnythingGoesFabric"
+    ]
+  },
+  "mixins": [
+    "anything_goes.mixins.json",
+    "anything_goes-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.2",
+    "architectury": ">=6.2.43"
+  }
+}
