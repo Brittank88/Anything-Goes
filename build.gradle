@@ -1,25 +1,58 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+    id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
 }
 
 architectury {
-    minecraft = rootProject.minecraft_version
+    minecraft = rootProject.minecraftVersion
 }
 
 subprojects {
     apply plugin: "dev.architectury.loom"
+    apply plugin: "io.github.juuxel.loom-quiltflower"
+
+    repositories {
+        // Add repositories to retrieve artifacts from in here.
+        // You should only use this when depending on other mods because Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+        // For more information about repositories: https://docs.gradle.org/current/userguide/declaring_repositories.html
+
+        maven {
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        maven {
+            name = "Fuzss Mod Resources"
+            url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+        }
+        maven {
+            name = 'Ladysnake Mods'
+            url = 'https://ladysnake.jfrog.io/artifactory/mods'
+        }
+        maven {
+            name = 'Curse Maven'
+            url = 'https://cursemaven.com'
+        }
+        maven {
+            name = 'Terraformers'
+            url = 'https://maven.terraformersmc.com/'
+        }
+    }
 
     loom {
         silentMojangMappingsLicense()
+
+        mixin {
+            defaultRefmapName = "${modId}.refmap.json"
+        }
     }
 
     dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        // The following line declares the mojmap mappings, you may use other mappings as well
-        mappings loom.officialMojangMappings()
-        // The following line declares the yarn mappings you may select this one as well.
-        // mappings "net.fabricmc:yarn:1.19.2+build.3:v2"
+        minecraft "com.mojang:minecraft:${rootProject.minecraftVersion}"
+        mappings loom.layered() {
+            officialMojangMappings()
+            parchment("org.parchmentmc.data:parchment-${minecraftVersion}:${parchmentMappingsVersion}@zip")
+        }
     }
 }
 
@@ -28,24 +61,85 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.archives_base_name
-    version = rootProject.mod_version
-    group = rootProject.maven_group
-
-    repositories {
-        // Add repositories to retrieve artifacts from in here.
-        // You should only use this when depending on other mods because
-        // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-        // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-        // for more information about repositories.
-    }
+    archivesBaseName = rootProject.archivesBaseName
+    version = rootProject.modVersion
+    group = rootProject.modMavenGroup
+    int javaVersion = rootProject.minJavaVersion as Integer
 
     tasks.withType(JavaCompile) {
+        // Ensure that the encoding is set to UTF-8, no matter what the system default is.
+        // This fixes some edge cases with special characters not displaying correctly.
+        // See: http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+        // If Javadoc is generated, this must be specified in that task too.
         options.encoding = "UTF-8"
-        options.release = 17
+        options.release = javaVersion
+    }
+
+    tasks.withType(Javadoc) {
+        // Ensure that the encoding is set to UTF-8, no matter what the system default is.
+        // This fixes some edge cases with special characters not displaying correctly.
+        // See: http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+        options.encoding = "UTF-8"
+
+        // Silence missing javadoc comments.
+        options.addStringOption("Xdoclint:none", "-quiet")
+    }
+
+    tasks.withType(Jar).configureEach {
+
+        // Add the license to the jar
+        from(file("LICENSE.md")) {
+            into "META-INF"
+        }
+
+        // Populate manifest attributes.
+        manifest {
+            attributes([
+                    "Specification-Title"               : modName,
+                    'Specification-Version'             : modVersion,
+                    "Specification-Vendor"              : modAuthor,
+                    'Implementation-Title'              : modName,
+                    'Implementation-Version'            : modVersion,
+                    'Implementation-Vendor'             : modAuthor,
+                    'Implementation-Timestamp'          : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                    'Implementation-Timestamp-Milli'    : System.currentTimeMillis(),
+                    'Implementation-URL'                : modSourceUrl,
+                    'Built-On-Java'                     : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                    'Built-On-Minecraft'                : minecraftVersion
+            ])
+        }
+
+        group 'jar'
+    }
+
+    tasks.withType(GenerateModuleMetadata) {
+        // Disables Gradle's custom module metadata from being published to maven.
+        // The metadata includes mapped dependencies which are not reasonably consumable by other mod developers.
+        enabled = false
     }
 
     java {
+        toolchain.languageVersion = JavaLanguageVersion.of(javaVersion)
         withSourcesJar()
+        withJavadocJar()
     }
+}
+
+import java.util.regex.Pattern
+
+/**
+ * This task is used to get the next version number.
+ * @param puzzlesLibVersion The current version number.
+ * @return The next version number.
+ * @see <a href="https://github.com/Fuzss/universalenchants/blob/1.19/build.gradle">Universal Enchants' Buildscript</a>
+ */
+def static getNextVersion(String puzzlesVersion) {
+    def puzzlesVersionMatcher = Pattern.compile("(\\d+\\.\\d+)").matcher(puzzlesVersion)
+    puzzlesVersionMatcher.find()
+    def currentVersion = puzzlesVersionMatcher.group(1)
+    return currentVersion
+            .substring(0, currentVersion.indexOf(".") + 1)
+            .concat(String.valueOf(Integer.parseInt(
+                    currentVersion.substring(currentVersion.indexOf(".") + 1, currentVersion.size())) + 1
+            ))
 }

@@ -24,10 +24,10 @@ configurations {
 }
 
 dependencies {
-    modImplementation "org.quiltmc:quilt-loader:${rootProject.quilt_loader_version}"
-    modApi "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quilt_fabric_api_version}"
+    modImplementation "org.quiltmc:quilt-loader:${rootProject.quiltLoaderVersion}"
+    modApi "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quiltFabricApiVersion}"
     // Remove the next few lines if you don't want to depend on the API
-    modApi("dev.architectury:architectury-fabric:${rootProject.architectury_version}") {
+    modApi("dev.architectury:architectury-fabric:${rootProject.architecturyVersion}") {
         // We must not pull Fabric Loader from Architectury Fabric
         exclude group: "net.fabricmc"
         exclude group: "net.fabricmc.fabric-api"
@@ -37,16 +37,93 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionQuilt")) { transitive false }
     common(project(path: ":fabric-like", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":fabric-like", configuration: "transformProductionQuilt")) { transitive false }
+
+    // Forge Configs
+    modImplementation "net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiPortVersion}"
+
+    // Puzzles Lib
+    modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesLibVersion}"
+
+    // Extensible Enums
+    modImplementation(include("fuzs.extensibleenums:extensibleenums-fabric:${extensibleEnumsVersion}"))
+
+    // Catalogue
+    modRuntimeOnly "curse.maven:catalogue-${catalogueFabricProjectId}:${catalogueFabricFileId}"
+
+    // Mod Menu
+    modRuntimeOnly "com.terraformersmc:modmenu:${modMenuVersion}"
 }
 
 processResources {
-    inputs.property "group", rootProject.maven_group
-    inputs.property "version", project.version
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
 
-    filesMatching("quilt.mod.json") {
-        expand "group": rootProject.maven_group,
-                "version": project.version
+    // This will ensure that this task is redone when a value changes.
+    inputs.property 'modId'                     , "${modId}"
+    inputs.property 'modName'                   , "${modName}"
+    inputs.property 'modVersion'                , "${modVersion}"
+    inputs.property 'modDescription'            , "${modDescription}"
+    inputs.property 'modGroup'                  , project.group
+    inputs.property 'modPageUrl'                , "${modSourceUrl}"
+    inputs.property 'modIssueUrl'               , "${modIssueUrl}"
+    inputs.property 'modLicense'                , "${modLicense}"
+    inputs.property 'modLogoFile'               , "${modLogoFile}"
+    inputs.property 'modIconFile'               , "${modIconFile}"
+    inputs.property 'modIconItem'               , "${modIconItem}"
+    inputs.property 'configuredBackgroundFile'  , "${configuredBackgroundFile}"
+    inputs.property 'modAuthor'                 , "${modAuthor}"
+    inputs.property 'minFabricLoaderVersion'    , "${minFabricLoaderVersion}"
+    inputs.property 'minFabricApiVersion'       , "${minFabricApiVersion}"
+    inputs.property 'minMinecraftVersion'       , "${minMinecraftVersion}"
+    inputs.property 'nextMinecraftVersion'      , rootProject.getNextVersion("${minMinecraftVersion}")
+    inputs.property 'architecturyVersion'       , "${architecturyVersion}"
+    inputs.property 'packFormat'                , "${packFormat}"
+    inputs.property 'mainEntryPoint'            , "${project.group}.quilt.${rootProject.name}Quilt"
+    inputs.property 'modQuiltEnvironment'       , "${modQuiltEnvironment}"
+    inputs.property 'minJavaVersion'            , "${minJavaVersion}"
+    inputs.property 'forgeConfigApiPortVersion' , "${forgeConfigApiPortVersion}"
+    inputs.property 'puzzleslibVersion'         , "${puzzlesLibVersion}"
+    inputs.property 'extensibleEnumsVersion'    , "${extensibleEnumsVersion}"
+
+    // replace stuff in fabric.mod.json and pack.mcmeta
+    filesMatching ('quilt.mod.json') {
+        expand (
+                'modId'                     : "${modId}",
+                'modName'                   : "${modName}",
+                'modVersion'                : "${modVersion}",
+                'modDescription'            : "${modDescription}",
+                'modGroup'                  : project.group,
+                'modPageUrl'                : "${modSourceUrl}",
+                'modIssueUrl'               : "${modIssueUrl}",
+                'modLicense'                : "${modLicense}",
+                'modLogoFile'               : "${modLogoFile}",
+                'modIconFile'               : "${modIconFile}",
+                'modIconItem'               : "${modIconItem}",
+                'configuredBackgroundFile'  : "${configuredBackgroundFile}",
+                'modAuthor'                 : "${modAuthor}",
+                'minQuiltLoaderVersion'     : "${minQuiltLoaderVersion}",
+                'minQuiltBaseVersion'       : "${minQuiltBaseVersion}",
+                'minMinecraftVersion'       : "${minMinecraftVersion}",
+                'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
+                'architecturyVersion'       : "${architecturyVersion}",
+                'mainEntryPoint'            : "${project.group}.fabric.${rootProject.name}Fabric",
+                'modQuiltEnvironment'       : "${modQuiltEnvironment}",
+                'minJavaVersion'            : "${minJavaVersion}",
+                'forgeConfigApiPortVersion' : "${forgeConfigApiPortVersion}",
+                'puzzleslibVersion'         : "${puzzlesLibVersion}",
+                'extensibleEnumsVersion'    : "${extensibleEnumsVersion}"
+        )
     }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription'    : "${modDescription}",
+                'packFormat'        : "${packFormat}"
+        )
+    }
+}
+
+javadoc {
+    source project(":common").sourceSets.main.allJava
 }
 
 shadowJar {
@@ -61,16 +138,9 @@ remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
-}
 
-jar {
-    classifier "dev"
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
+    // Resolves FileSystem errors when building with org.gradle.parallel=true.
+    mustRunAfter(project(":fabric").getTasks().named("remapJar"))
 }
 
 components.java {
@@ -82,7 +152,7 @@ components.java {
 publishing {
     publications {
         mavenQuilt(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.archivesBaseName + "-" + project.name
             from components.java
         }
     }

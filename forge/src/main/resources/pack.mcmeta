@@ -1,6 +1,6 @@
 {
   "pack": {
-    "description": "Anything Goes",
-    "pack_format": 9
+    "description": "${modDescription}",
+    "pack_format": ${packFormat}
   }
 }

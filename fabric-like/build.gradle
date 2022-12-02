@@ -1,5 +1,5 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    common(rootProject.enabledPlatforms.split(","))
 }
 
 loom {
@@ -7,10 +7,10 @@ loom {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabricApiVersion}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.architecturyVersion}"
 
     compileClasspath(project(path: ":common", configuration: "namedElements")) { transitive false }
 }

@@ -1,23 +1,46 @@
 architectury {
-    common(rootProject.enabled_platforms.split(","))
+    common(rootProject.enabledPlatforms.split(","))
 }
 
 loom {
     accessWidenerPath = file("src/main/resources/anything_goes.accesswidener")
+
+    // Should hopefully prevent an empty run directory being generated in common during initial project setup.
+    runs {
+        client {
+            client()
+            setConfigName("Common Client")
+            ideConfigGenerated(false)
+            runDir("../run")
+        }
+        server {
+            server()
+            setConfigName("Common Server")
+            ideConfigGenerated(false)
+            runDir("../run")
+        }
+    }
 }
 
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury:${rootProject.architecturyVersion}"
+
+    // Config Dependencies
+    implementation 'com.electronwill.night-config:core:${nightConfigVersion}'
+    implementation 'com.electronwill.night-config:toml:${nightConfigVersion}'
+
+    // Puzzles Lib
+    modImplementation "fuzs.puzzleslib:puzzleslib-common:${puzzlesLibVersion}"
 }
 
 publishing {
     publications {
         mavenCommon(MavenPublication) {
-            artifactId = rootProject.archives_base_name
+            artifactId = rootProject.archivesBaseName
             from components.java
         }
     }
@@ -26,4 +49,8 @@ publishing {
     repositories {
         // Add repositories to publish to here.
     }
+}
+
+repositories {
+    mavenCentral()
 }

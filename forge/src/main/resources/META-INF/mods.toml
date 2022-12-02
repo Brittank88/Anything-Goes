@@ -1,35 +1,48 @@
 modLoader = "javafml"
-loaderVersion = "[43,)"
-#issueTrackerURL = ""
-license = "Insert License Here"
+loaderVersion = "[${minFMLVersion},)"
+issueTrackerURL = "${modIssueUrl}"
+license = "${modLicense}"
 
 [[mods]]
-modId = "examplemod"
-version = "${version}"
-displayName = "Example Mod"
-authors = "Me!"
-description = '''
-This is an example description! Tell everyone what your mod is about!
-'''
-#logoFile = ""
+    modId="${modId}"
+    displayName="${modName}"
+    description="${modDescription}"
+    version="${modVersion}"
+    authors="${modAuthor}"
+    logoFile="${modLogoFile}"
+    logoBlur=false
+    displayURL="${modPageUrl}"
+    displayTest="${modForgeDisplayTest}"
 
-[[dependencies.examplemod]]
-modId = "forge"
-mandatory = true
-versionRange = "[43,)"
-ordering = "NONE"
-side = "BOTH"
+[[dependencies.${modId}]]
+    modId = "forge"
+    mandatory = true
+    versionRange = "[${minFMLVersion},)"
+    ordering = "NONE"
+    side = "BOTH"
 
-[[dependencies.examplemod]]
-modId = "minecraft"
-mandatory = true
-versionRange = "[1.19.2,)"
-ordering = "NONE"
-side = "BOTH"
+[[dependencies.${modId}]]
+    modId = "minecraft"
+    mandatory = true
+    versionRange = "[${minMinecraftVersion},${nextMinecraftVersion})"
+    ordering = "NONE"
+    side = "BOTH"
 
-[[dependencies.examplemod]]
-modId = "architectury"
-mandatory = true
-versionRange = "[6.2.43,)"
-ordering = "AFTER"
-side = "BOTH"
+[[dependencies.${modId}]]
+    modId = "architectury"
+    mandatory = true
+    versionRange = "[${architecturyVersion},)"
+    ordering = "AFTER"
+    side = "BOTH"
+
+[[dependencies.${modId}]]
+    modId="puzzleslib"
+    mandatory=true
+    versionRange="[${puzzlesLibVersion},)"
+    ordering="NONE"
+    side="BOTH"
+
+[modproperties.${modId}]
+    catalogueImageIcon="${modIconFile}"
+    catalogueItemIcon="${modIconItem}"
+    configuredBackground="${configuredBackgroundFile}"

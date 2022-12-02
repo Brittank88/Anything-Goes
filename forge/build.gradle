@@ -28,20 +28,86 @@ configurations {
 }
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
+    forge "net.minecraftforge:forge:${rootProject.forgeVersion}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury-forge:${rootProject.architecturyVersion}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    // Catalogue
+    modRuntimeOnly "curse.maven:catalogue-${catalogueForgeProjectId}:${catalogueForgeFileId}"
+
+    // Better Mods Button
+    modRuntimeOnly "fuzs.bettermodsbutton:bettermodsbutton-forge:${betterModsButtonVersion}"
+
+    // Puzzles Lib
+    modImplementation "fuzs.puzzleslib:puzzleslib-forge:${puzzlesLibVersion}"
 }
 
 processResources {
-    inputs.property "version", project.version
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
 
-    filesMatching("META-INF/mods.toml") {
-        expand "version": project.version
+    // This will ensure that this task is redone when a value changes.
+    inputs.property 'modLicense'                , "${modLicense}"
+    inputs.property 'modId'                     , "${modId}"
+    inputs.property 'modName'                   , "${modName}"
+    inputs.property 'modVersion'                , "${modVersion}"
+    inputs.property 'modDescription'            , "${modDescription}"
+    inputs.property 'modGroup'                  , project.group
+    inputs.property 'modPageUrl'                , "${modSourceUrl}"
+    inputs.property 'modIssueUrl'               , "${modIssueUrl}"
+    inputs.property 'modAuthor'                 , "${modAuthor}"
+    inputs.property 'modLogoFile'               , "${modLogoFile}"
+    inputs.property 'modIconFile'               , "${modIconFile}"
+    inputs.property 'modIconItem'               , "${modIconItem}"
+    inputs.property 'configuredBackgroundFile'  , "${configuredBackgroundFile}"
+    inputs.property 'minFMLVersion'             , "${minForgeVersion}".replaceAll('\\..*', '')
+    inputs.property 'minForgeVersion'           , "${minForgeVersion}"
+    inputs.property 'minMinecraftVersion'       , "${minMinecraftVersion}"
+    inputs.property 'nextMinecraftVersion'      , rootProject.getNextVersion("${minMinecraftVersion}")
+    inputs.property 'architecturyVersion'       , "${architecturyVersion}"
+    inputs.property 'puzzlesLibVersion'         , "${puzzlesLibVersion}"
+    inputs.property 'packFormat'                , "${packFormat}"
+    inputs.property 'modForgeDisplayTest'       , "${modForgeDisplayTest}"
+
+    // Replace stuff in mods.toml.
+    filesMatching ('META-INF/mods.toml') {
+        expand (
+                'modLicense'                : "${modLicense}",
+                'modId'                     : "${modId}",
+                'modName'                   : "${modName}",
+                'modVersion'                : "${modVersion}",
+                'modDescription'            : "${modDescription}",
+                'modGroup'                  : project.group,
+                'modPageUrl'                : "${modSourceUrl}",
+                'modIssueUrl'               : "${modIssueUrl}",
+                'modAuthor'                 : "${modAuthor}",
+                'modLogoFile'               : "${modLogoFile}",
+                'modIconFile'               : "${modIconFile}",
+                'modIconItem'               : "${modIconItem}",
+                'configuredBackgroundFile'  : "${configuredBackgroundFile}",
+                'minFMLVersion'             : "${minForgeVersion}".replaceAll('\\..*', ''),
+                'minForgeVersion'           : "${minForgeVersion}",
+                'minMinecraftVersion'       : "${minMinecraftVersion}",
+                'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
+                'architecturyVersion'       : "${architecturyVersion}",
+                'puzzlesLibVersion'         : "${puzzlesLibVersion}",
+                'modForgeDisplayTest'       : "${modForgeDisplayTest}"
+        )
     }
+
+    // Replace stuff in pack.mcmeta.
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription'    : "${modDescription}",
+                'packFormat'        : "${packFormat}"
+        )
+    }
+}
+
+javadoc {
+    source project(":common").sourceSets.main.allJava
 }
 
 shadowJar {
@@ -58,16 +124,6 @@ remapJar {
     classifier null
 }
 
-jar {
-    classifier "dev"
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-}
-
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
@@ -77,7 +133,7 @@ components.java {
 publishing {
     publications {
         mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.archivesBaseName + "-" + project.name
             from components.java
         }
     }

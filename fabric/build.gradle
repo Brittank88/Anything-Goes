@@ -20,23 +20,106 @@ configurations {
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabricLoaderVersion}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabricApiVersion}"
     // Remove the next line if you don't want to depend on the API
-    modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+    modApi "dev.architectury:architectury-fabric:${rootProject.architecturyVersion}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
     common(project(path: ":fabric-like", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":fabric-like", configuration: "transformProductionFabric")) { transitive false }
+
+    // Forge Configs
+    modImplementation "net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiPortVersion}"
+
+    // Puzzles Lib
+    modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesLibVersion}"
+
+    // Extensible Enums
+    modImplementation(include("fuzs.extensibleenums:extensibleenums-fabric:${extensibleEnumsVersion}"))
+
+    // Catalogue
+    modRuntimeOnly "curse.maven:catalogue-${catalogueFabricProjectId}:${catalogueFabricFileId}"
+
+    // Mod Menu
+    modRuntimeOnly "com.terraformersmc:modmenu:${modMenuVersion}"
 }
 
 processResources {
-    inputs.property "version", project.version
+    duplicatesStrategy DuplicatesStrategy.INCLUDE
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    // This will ensure that this task is redone when a value changes.
+    inputs.property 'modId'                     , "${modId}"
+    inputs.property 'modName'                   , "${modName}"
+    inputs.property 'modVersion'                , "${modVersion}"
+    inputs.property 'modDescription'            , "${modDescription}"
+    inputs.property 'modGroup'                  , project.group
+    inputs.property 'modPageUrl'                , "${modSourceUrl}"
+    inputs.property 'modIssueUrl'               , "${modIssueUrl}"
+    inputs.property 'modLicense'                , "${modLicense}"
+    inputs.property 'modLogoFile'               , "${modLogoFile}"
+    inputs.property 'modIconFile'               , "${modIconFile}"
+    inputs.property 'modIconItem'               , "${modIconItem}"
+    inputs.property 'configuredBackgroundFile'  , "${configuredBackgroundFile}"
+    inputs.property 'modAuthor'                 , "${modAuthor}"
+    inputs.property 'minFabricLoaderVersion'    , "${minFabricLoaderVersion}"
+    inputs.property 'minFabricApiVersion'       , "${minFabricApiVersion}"
+    inputs.property 'minMinecraftVersion'       , "${minMinecraftVersion}"
+    inputs.property 'nextMinecraftVersion'      , rootProject.getNextVersion("${minMinecraftVersion}")
+    inputs.property 'architecturyVersion'       , "${architecturyVersion}"
+    inputs.property 'packFormat'                , "${packFormat}"
+    inputs.property 'mainEntryPoint'            , "${project.group}.fabric.${rootProject.name}Fabric"
+    inputs.property 'modFabricEnvironment'      , "${modFabricEnvironment}"
+    inputs.property 'minJavaVersion'            , "${minJavaVersion}"
+    inputs.property 'forgeConfigApiPortVersion' , "${forgeConfigApiPortVersion}"
+    inputs.property 'puzzlesLibVersion'         , "${puzzlesLibVersion}"
+    inputs.property 'extensibleEnumsVersion'    , "${extensibleEnumsVersion}"
+
+    // replace stuff in fabric.mod.json and pack.mcmeta
+    filesMatching ('fabric.mod.json') {
+        expand (
+                'modId'                     : "${modId}",
+                'modName'                   : "${modName}",
+                'modVersion'                : "${modVersion}",
+                'modDescription'            : "${modDescription}",
+                'modGroup'                  : project.group,
+                'modPageUrl'                : "${modSourceUrl}",
+                'modIssueUrl'               : "${modIssueUrl}",
+                'modLicense'                : "${modLicense}",
+                'modLogoFile'               : "${modLogoFile}",
+                'modIconFile'               : "${modIconFile}",
+                'modIconItem'               : "${modIconItem}",
+                'configuredBackgroundFile'  : "${configuredBackgroundFile}",
+                'modAuthor'                 : "${modAuthor}",
+                'minFabricLoaderVersion'    : "${minFabricLoaderVersion}",
+                'minFabricApiVersion'       : "${minFabricApiVersion}",
+                'minMinecraftVersion'       : "${minMinecraftVersion}",
+                'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
+                'architecturyVersion'       : "${architecturyVersion}",
+                'mainEntryPoint'            : "${project.group}.fabric.${rootProject.name}Fabric",
+                'modFabricEnvironment'      : "${modFabricEnvironment}",
+                'minJavaVersion'            : "${minJavaVersion}",
+                'forgeConfigApiPortVersion' : "${forgeConfigApiPortVersion}",
+                'puzzlesLibVersion'         : "${puzzlesLibVersion}",
+                'extensibleEnumsVersion'    : "${extensibleEnumsVersion}"
+        )
     }
+
+    filesMatching ('pack.mcmeta') {
+        expand (
+                'modDescription'    : "${modDescription}",
+                'packFormat'        : "${packFormat}"
+        )
+    }
+}
+
+jar {
+    classifier "dev"
+}
+
+javadoc {
+    source project(":common").sourceSets.main.allJava
 }
 
 shadowJar {
@@ -53,16 +136,6 @@ remapJar {
     classifier null
 }
 
-jar {
-    classifier "dev"
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-}
-
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
@@ -72,7 +145,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.archivesBaseName + "-" + project.name
             from components.java
         }
     }
