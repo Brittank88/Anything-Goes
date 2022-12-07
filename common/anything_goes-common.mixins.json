@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "minVersion": "0.8.5",
+  "package": "com.brittank88.anything_goes.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [],
+  "mixins": [
+    "AnvilMenuMixin",
+    "EnchantmentHelperMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

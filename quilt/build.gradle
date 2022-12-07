@@ -24,8 +24,10 @@ configurations {
 }
 
 dependencies {
+
     modImplementation "org.quiltmc:quilt-loader:${rootProject.quiltLoaderVersion}"
-    modApi "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quiltFabricApiVersion}"
+    modApi "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quiltFabricApiVersion}-${rootProject.minecraftVersion}"
+    // modApi "org.quiltmc:qsl:${rootProject.quiltBaseVersion}+${rootProject.minecraftVersion}"
     // Remove the next few lines if you don't want to depend on the API
     modApi("dev.architectury:architectury-fabric:${rootProject.architecturyVersion}") {
         // We must not pull Fabric Loader from Architectury Fabric
@@ -39,23 +41,49 @@ dependencies {
     shadowCommon(project(path: ":fabric-like", configuration: "transformProductionQuilt")) { transitive false }
 
     // Forge Configs
-    modImplementation "net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiPortVersion}"
+    modImplementation("net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiPortVersion}") {
+        exclude group: "net.fabricmc"
+        exclude group: "net.fabricmc.fabric-api"
+    }
 
     // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesLibVersion}"
+    modImplementation("fuzs.puzzleslib:puzzleslib-fabric:${puzzlesLibVersion}") {
+        exclude group: "net.fabricmc"
+        exclude group: "net.fabricmc.fabric-api"
+    }
 
     // Extensible Enums
-    modImplementation(include("fuzs.extensibleenums:extensibleenums-fabric:${extensibleEnumsVersion}"))
+    modImplementation(include("fuzs.extensibleenums:extensibleenums-fabric:${extensibleEnumsVersion}")) {
+        exclude group: "net.fabricmc"
+        exclude group: "net.fabricmc.fabric-api"
+    }
 
     // Catalogue
-    modRuntimeOnly "curse.maven:catalogue-${catalogueFabricProjectId}:${catalogueFabricFileId}"
+    modRuntimeOnly("curse.maven:catalogue-${catalogueFabricProjectId}:${catalogueFabricFileId}") {
+        exclude group: "net.fabricmc"
+        exclude group: "net.fabricmc.fabric-api"
+    }
 
     // Mod Menu
-    modRuntimeOnly "com.terraformersmc:modmenu:${modMenuVersion}"
+    modRuntimeOnly("com.terraformersmc:modmenu:${modMenuVersion}") {
+        exclude group: "net.fabricmc"
+        exclude group: "net.fabricmc.fabric-api"
+    }
+}
+
+// Replace Fabric with Quilt.
+configurations.all {
+    resolutionStrategy.dependencySubstitution {
+        substitute module("net.fabricmc:fabric-loader") using module("org.quiltmc:quilt-loader:${rootProject.quiltLoaderVersion}")
+        substitute module("net.fabricmc.fabric-api:fabric-api") using module("org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quiltFabricApiVersion}-${rootProject.minecraftVersion}")
+    }
 }
 
 processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
+
+    // Fixes issues relating to files that are missing from the jar when using run configs.
+    from(project(":common").sourceSets.main.resources)
 
     // This will ensure that this task is redone when a value changes.
     inputs.property 'modId'                     , "${modId}"
@@ -71,8 +99,9 @@ processResources {
     inputs.property 'modIconItem'               , "${modIconItem}"
     inputs.property 'configuredBackgroundFile'  , "${configuredBackgroundFile}"
     inputs.property 'modAuthor'                 , "${modAuthor}"
-    inputs.property 'minFabricLoaderVersion'    , "${minFabricLoaderVersion}"
-    inputs.property 'minFabricApiVersion'       , "${minFabricApiVersion}"
+    inputs.property 'minQuiltLoaderVersion'     , "${minQuiltLoaderVersion}"
+    inputs.property 'minQuiltFabricApiVersion'  , "${minQuiltFabricApiVersion}-${rootProject.minecraftVersion}"
+    inputs.property 'minQuiltBaseVersion'       , "${minQuiltBaseVersion}+${rootProject.minecraftVersion}"
     inputs.property 'minMinecraftVersion'       , "${minMinecraftVersion}"
     inputs.property 'nextMinecraftVersion'      , rootProject.getNextVersion("${minMinecraftVersion}")
     inputs.property 'architecturyVersion'       , "${architecturyVersion}"
@@ -101,11 +130,12 @@ processResources {
                 'configuredBackgroundFile'  : "${configuredBackgroundFile}",
                 'modAuthor'                 : "${modAuthor}",
                 'minQuiltLoaderVersion'     : "${minQuiltLoaderVersion}",
-                'minQuiltBaseVersion'       : "${minQuiltBaseVersion}",
+                'minQuiltFabricApiVersion'  : "${minQuiltFabricApiVersion}-${rootProject.minecraftVersion}",
+                'minQuiltBaseVersion'       : "${minQuiltBaseVersion}+${rootProject.minecraftVersion}",
                 'minMinecraftVersion'       : "${minMinecraftVersion}",
                 'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
                 'architecturyVersion'       : "${architecturyVersion}",
-                'mainEntryPoint'            : "${project.group}.fabric.${rootProject.name}Fabric",
+                'mainEntryPoint'            : "${project.group}.quilt.${rootProject.name}Quilt",
                 'modQuiltEnvironment'       : "${modQuiltEnvironment}",
                 'minJavaVersion'            : "${minJavaVersion}",
                 'forgeConfigApiPortVersion' : "${forgeConfigApiPortVersion}",

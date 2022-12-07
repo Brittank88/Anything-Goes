@@ -48,6 +48,9 @@ dependencies {
 processResources {
     duplicatesStrategy DuplicatesStrategy.INCLUDE
 
+    // Fixes issues relating to files that are missing from the jar when using run configs.
+    from(project(":common").sourceSets.main.resources)
+
     // This will ensure that this task is redone when a value changes.
     inputs.property 'modLicense'                , "${modLicense}"
     inputs.property 'modId'                     , "${modId}"
