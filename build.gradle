@@ -37,6 +37,10 @@ subprojects {
             name = 'Terraformers'
             url = 'https://maven.terraformersmc.com/'
         }
+        maven {
+            name = 'NucleoidMC'
+            url = 'https://maven.nucleoid.xyz'
+        }
     }
 
     loom {

@@ -36,13 +36,14 @@ license = "${modLicense}"
     side = "BOTH"
 
 [[dependencies.${modId}]]
-    modId="puzzleslib"
+    modId="configured"
     mandatory=true
-    versionRange="[${puzzlesLibVersion},)"
+    versionRange="[${configuredForgeVersion},)"
     ordering="NONE"
     side="BOTH"
 
 [modproperties.${modId}]
     catalogueImageIcon="${modIconFile}"
     catalogueItemIcon="${modIconItem}"
+    configuredConfigs=[ "${configEntryPoint}" ]
     configuredBackground="${configuredBackgroundFile}"

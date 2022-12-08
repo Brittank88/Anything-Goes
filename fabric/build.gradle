@@ -33,14 +33,14 @@ dependencies {
     // Forge Configs
     modImplementation "net.minecraftforge:forgeconfigapiport-fabric:${forgeConfigApiPortVersion}"
 
-    // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-fabric:${puzzlesLibVersion}"
-
     // Extensible Enums
     modImplementation(include("fuzs.extensibleenums:extensibleenums-fabric:${extensibleEnumsVersion}"))
 
     // Catalogue
     modRuntimeOnly "curse.maven:catalogue-${catalogueFabricProjectId}:${catalogueFabricFileId}"
+
+    // Configured
+    modImplementation "curse.maven:configured-${configuredFabricProjectId}:${configuredFabricFileId}"
 
     // Mod Menu
     modRuntimeOnly "com.terraformersmc:modmenu:${modMenuVersion}"
@@ -73,11 +73,11 @@ processResources {
     inputs.property 'architecturyVersion'       , "${architecturyVersion}"
     inputs.property 'packFormat'                , "${packFormat}"
     inputs.property 'mainEntryPoint'            , "${project.group}.fabric.${rootProject.name}Fabric"
+    inputs.property 'configEntryPoint'          , "${project.group}.config.${rootProject.name}Config"
     inputs.property 'modFabricEnvironment'      , "${modFabricEnvironment}"
     inputs.property 'minJavaVersion'            , "${minJavaVersion}"
     inputs.property 'forgeConfigApiPortVersion' , "${forgeConfigApiPortVersion}"
-    inputs.property 'puzzlesLibVersion'         , "${puzzlesLibVersion}"
-    inputs.property 'extensibleEnumsVersion'    , "${extensibleEnumsVersion}"
+    inputs.property 'configuredFabricVersion'   , "${configuredFabricVersion}"
 
     // replace stuff in fabric.mod.json and pack.mcmeta
     filesMatching ('fabric.mod.json') {
@@ -101,11 +101,11 @@ processResources {
                 'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
                 'architecturyVersion'       : "${architecturyVersion}",
                 'mainEntryPoint'            : "${project.group}.fabric.${rootProject.name}Fabric",
+                'configEntryPoint'          : "${project.group}.config.${rootProject.name}Config",
                 'modFabricEnvironment'      : "${modFabricEnvironment}",
                 'minJavaVersion'            : "${minJavaVersion}",
                 'forgeConfigApiPortVersion' : "${forgeConfigApiPortVersion}",
-                'puzzlesLibVersion'         : "${puzzlesLibVersion}",
-                'extensibleEnumsVersion'    : "${extensibleEnumsVersion}"
+                'configuredFabricVersion'   : "${configuredFabricVersion}"
         )
     }
 

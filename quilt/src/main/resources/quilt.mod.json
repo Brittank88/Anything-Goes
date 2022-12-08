@@ -57,12 +57,8 @@
 				"version": ">=${forgeConfigApiPortVersion}"
 			},
 			{
-				"id": "puzzleslib",
-				"version": ">=${puzzleslibVersion}"
-			},
-			{
-				"id": "extensibleenums",
-				"version": ">=${extensibleEnumsVersion}"
+				"id": "configured",
+				"version": ">=${configuredFabricVersion}"
 			}
 		]
 	},
@@ -74,6 +70,7 @@
 		}
 	},
 	"configured": {
+		"configs": [ "${configEntryPoint}" ],
 		"background": "${configuredBackgroundFile}"
 	}
 }

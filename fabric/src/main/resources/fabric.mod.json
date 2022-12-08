@@ -35,8 +35,7 @@
 		"architectury": ">=${architecturyVersion}",
 		"java": ">=${minJavaVersion}",
 		"forgeconfigapiport": ">=${forgeConfigApiPortVersion}",
-		"puzzleslib": ">=${puzzlesLibVersion}",
-		"extensibleenums": ">=${extensibleEnumsVersion}"
+		"configured": ">=${configuredFabricVersion}"
 	},
 
 	"custom" : {
@@ -47,6 +46,7 @@
 			}
 		},
 		"configured": {
+			"configs": [ "${configEntryPoint}" ],
 			"background": "${configuredBackgroundFile}"
 		}
 	}

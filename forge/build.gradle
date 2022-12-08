@@ -38,11 +38,11 @@ dependencies {
     // Catalogue
     modRuntimeOnly "curse.maven:catalogue-${catalogueForgeProjectId}:${catalogueForgeFileId}"
 
+    // Configured
+    modImplementation "curse.maven:configured-${configuredForgeProjectId}:${configuredForgeFileId}"
+
     // Better Mods Button
     modRuntimeOnly "fuzs.bettermodsbutton:bettermodsbutton-forge:${betterModsButtonVersion}"
-
-    // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-forge:${puzzlesLibVersion}"
 }
 
 processResources {
@@ -65,14 +65,15 @@ processResources {
     inputs.property 'modIconFile'               , "${modIconFile}"
     inputs.property 'modIconItem'               , "${modIconItem}"
     inputs.property 'configuredBackgroundFile'  , "${configuredBackgroundFile}"
+    inputs.property 'configEntryPoint'          , "${project.group}.config.${rootProject.name}Config"
     inputs.property 'minFMLVersion'             , "${minForgeVersion}".replaceAll('\\..*', '')
     inputs.property 'minForgeVersion'           , "${minForgeVersion}"
     inputs.property 'minMinecraftVersion'       , "${minMinecraftVersion}"
     inputs.property 'nextMinecraftVersion'      , rootProject.getNextVersion("${minMinecraftVersion}")
     inputs.property 'architecturyVersion'       , "${architecturyVersion}"
-    inputs.property 'puzzlesLibVersion'         , "${puzzlesLibVersion}"
     inputs.property 'packFormat'                , "${packFormat}"
     inputs.property 'modForgeDisplayTest'       , "${modForgeDisplayTest}"
+    inputs.property 'configuredForgeVersion'    , "${configuredForgeVersion}"
 
     // Replace stuff in mods.toml.
     filesMatching ('META-INF/mods.toml') {
@@ -90,13 +91,14 @@ processResources {
                 'modIconFile'               : "${modIconFile}",
                 'modIconItem'               : "${modIconItem}",
                 'configuredBackgroundFile'  : "${configuredBackgroundFile}",
+                'configEntryPoint'          : "${project.group}.config.${rootProject.name}Config",
                 'minFMLVersion'             : "${minForgeVersion}".replaceAll('\\..*', ''),
                 'minForgeVersion'           : "${minForgeVersion}",
                 'minMinecraftVersion'       : "${minMinecraftVersion}",
                 'nextMinecraftVersion'      : rootProject.getNextVersion("${minMinecraftVersion}"),
                 'architecturyVersion'       : "${architecturyVersion}",
-                'puzzlesLibVersion'         : "${puzzlesLibVersion}",
-                'modForgeDisplayTest'       : "${modForgeDisplayTest}"
+                'modForgeDisplayTest'       : "${modForgeDisplayTest}",
+                'configuredForgeVersion'    : "${configuredForgeVersion}"
         )
     }
 

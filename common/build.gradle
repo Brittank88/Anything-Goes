@@ -29,12 +29,14 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury:${rootProject.architecturyVersion}"
 
-    // Config Dependencies
-    implementation 'com.electronwill.night-config:core:${nightConfigVersion}'
-    implementation 'com.electronwill.night-config:toml:${nightConfigVersion}'
+    // Configured
+    // We pick the Fabric version because it seems to be updated later than the Forge version.
+    // This should prevent the use of annotations that don't exist on one side.
+    // TODO: This isn't a perfect solution, but it's the best I can think of until I switch to using the cursemaven gradle plugin and a single universal version.
+    modCompileOnly "curse.maven:configured-${configuredFabricProjectId}:${configuredFabricFileId}"
 
-    // Puzzles Lib
-    modImplementation "fuzs.puzzleslib:puzzleslib-common:${puzzlesLibVersion}"
+    // Server Translations API
+    modImplementation include("fr.catcore:server-translations-api:${serverTranslationsAPIVersion}")
 }
 
 publishing {

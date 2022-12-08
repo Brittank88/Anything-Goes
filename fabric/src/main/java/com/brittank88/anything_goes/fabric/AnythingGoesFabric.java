@@ -4,8 +4,8 @@ import com.brittank88.anything_goes.fabriclike.AnythingGoesFabricLike;
 import net.fabricmc.api.ModInitializer;
 
 public class AnythingGoesFabric implements ModInitializer {
-    @Override
-    public void onInitialize() {
+
+    @Override public void onInitialize() {
         AnythingGoesFabricLike.init();
     }
 }
